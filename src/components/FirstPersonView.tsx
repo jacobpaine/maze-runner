@@ -1,6 +1,6 @@
 import React, { useMemo, useState, useEffect } from "react";
 import { useGame } from "../contexts/GameContext";
-import { playerPositionAndDirectionToSideWalls } from "../utils/viewUtils";
+import { posDirectionToSideRooms } from "../utils/viewUtils";
 
 export const FirstPersonView: React.FC = () => {
   const { direction, mazeData, playerPos } = useGame();
@@ -16,10 +16,10 @@ export const FirstPersonView: React.FC = () => {
     const timeout = setTimeout(() => {
       setMovementOffset(0);
       setBobOffset(0);
-    }, 200); // Short effect duration for natural feel
+    }, 100);
     return () => clearTimeout(timeout);
-  }, [x, y]); // Trigger effect when position changes
-  // Front walls - Render up to 3 layers deep
+  }, [x, y]);
+
   const frontWalls = useMemo(() => {
     const walls = [];
     for (let i = 1; i <= 3; i++) {
@@ -29,10 +29,9 @@ export const FirstPersonView: React.FC = () => {
         walls.push({
           id: `wall-${i}`,
           distance: i,
-          width: `${100 - i * 15}%`,
-          height: `${100 - i * 15}%`,
+          width: `${100 - i * 18}%`,
+          height: `${104 - i * 20}%`,
           top: `${i * 8}%`,
-          opacity: 1 - i * 0.2,
           texture: "/textures/brick_wall.png",
           zIndex: 30 - i,
         });
@@ -41,19 +40,8 @@ export const FirstPersonView: React.FC = () => {
     return walls;
   }, [x, y, direction]);
 
-  // const sideRooms = useMemo(() => {
-  //   const sideWalls = playerPositionAndDirectionToSideWalls(
-  //     playerPos,
-  //     direction
-  //   );
-  //   return sideWalls.flat().filter(Boolean);
-  // }, [playerPos, direction]);
-
   const sideRooms = useMemo(() => {
-    const sideWalls = playerPositionAndDirectionToSideWalls(
-      playerPos,
-      direction
-    );
+    const sideWalls = posDirectionToSideRooms(playerPos, direction);
     const walls = sideWalls.flat().filter(Boolean);
     console.log("Final sideWalls before rendering:", walls);
     return walls;
@@ -64,7 +52,7 @@ export const FirstPersonView: React.FC = () => {
       {
         type: "ceiling",
         width: "110%",
-        height: "40%",
+        height: "25%",
         top: "0%",
         transform: `perspective(800px) rotateX(20deg) scaleX(1) translateY(${bobOffset}px) translateZ(${movementOffset}px)`,
         backgroundColor: "rgba(120, 120, 200, 0.8)",
@@ -85,7 +73,6 @@ export const FirstPersonView: React.FC = () => {
   return (
     <div className="relative w-64 h-64 bg-gray-900 border border-gray-700 overflow-hidden transition-all duration-200">
       {ceilingAndFloor.map((plane) => {
-        console.log("Plane: ", plane);
         return (
           <div
             key={`plane-${plane.type}`}
@@ -113,15 +100,18 @@ export const FirstPersonView: React.FC = () => {
             sideRoom
           );
         }
+        console.log("sideRoom", sideRoom);
         return (
           <div
-            id={`${sideRoom.id}-${index}`}
+            id={`${sideRoom.id}-ind${index}`}
             key={`${sideRoom.id}-${index}`} // Ensure each key is unique
             className="absolute transition-all duration-200"
             style={{
               width: sideRoom.width || "50%", // Ensure a default width
               height: sideRoom.height || "100%", // Ensure a default height
               transform: sideRoom.transform || "none",
+              backgroundImage: `url(${sideRoom.texture})`,
+              backgroundSize: "contain",
               backgroundColor: sideRoom.backgroundColor || "red", // Make it visible for debugging
               zIndex: sideRoom.zIndex || 10,
             }}
@@ -131,6 +121,7 @@ export const FirstPersonView: React.FC = () => {
 
       {frontWalls.map((wall) => (
         <div
+          id={wall.id}
           key={wall.id}
           className="absolute left-1/2 transform -translate-x-1/2 transition-all duration-300"
           style={{
