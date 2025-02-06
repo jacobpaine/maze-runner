@@ -22,3 +22,21 @@ export type Compass = Record<string, Turn>
 
 
 export type Side = "forward" | "left" | "right"
+
+export type SideRoom = {
+  distance: number;
+  height: string;
+  id: string;
+  side: Side;
+  texture: string;
+  transform: string;
+  width: string;
+  zIndex: number;
+}
+
+export type Coordinates = {
+  x: number;
+  y: number;
+  distance: Distance;
+  side: Side;
+}

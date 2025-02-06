@@ -20,7 +20,7 @@ const Maze: React.FC = () => {
                 } ${
                   playerPos.x === x && playerPos.y === y ? "bg-blue-500" : ""
                 }`}
-              >
+              > {x}:{y}
                 {playerPos.x === x && playerPos.y === y ? "🧑" : ""}
               </div>
             ))}

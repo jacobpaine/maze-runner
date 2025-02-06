@@ -1,5 +1,5 @@
-import { PositionType, Direction, MazeData, Compass, Distance, Side, RoomPositionType } from "../types/index";
-import { compassOperators, mazeData } from "../constants/mazeData";
+import { PositionType, Direction, MazeData, Compass, Distance, Side, RoomPositionType, SideRoom } from "../types/index";
+import { mazeData } from "../constants/mazeData";
 import { Dispatch, SetStateAction } from "react";
 
 export const posToNorth = ({ x, y }: PositionType) => ({ x, y: y - 1 });
@@ -99,8 +99,8 @@ const roomDistanceToDistanceNumber = (roomDistance: string) => {
 
 export const leftConfig = {
   perspective: "550px",
-  rotateY: "258deg",
-  translateX: (ind: number) => `${ind * 35}%`,
+  rotateY: "260deg",
+  translateX: (ind: number) => `${ind * 35 - 5 }%`,
   translateY: "0%",
   scaleX: ".35",
   scaleY: ".35",
@@ -109,8 +109,8 @@ export const leftConfig = {
 
 export const rightConfig = {
   perspective: "550px",
-  rotateY: "-78deg",
-  translateX: (ind: number) => `${ind * 35}%`,
+  rotateY: "-80deg",
+  translateX: (ind: number) => `${ind * 35 - 5}%`,
   translateY: "0%",
   scaleX: ".35",
   scaleY: ".35",
@@ -118,26 +118,37 @@ export const rightConfig = {
 };
 
 const sideDistanceToTransform = (side: Side, distance: number) => {
-  if (side === "left") {
-    const leftTransform = leftConfig.translateX(distance)
-    const { perspective, rotateY, scaleX, scaleY} = leftConfig;
-    return `perspective(${perspective}) rotateY(${rotateY}) translateX(${leftTransform}) scaleX(${scaleX}) scaleY(${scaleY})`
+  console.log('distance: ', distance)
+  const transformMap:Record<string, Record<number, string>> = {
+    left: {
+      4:  "perspective(550px) rotateY(-80deg) translateX(135%) scaleX(.35) scaleY(.35)",
+      3: "",
+      2: "",
+      1: ""
+    },
+    right: {
+      3: "",
+      2: "",
+      1: ""
+    }
+  };
+
+  if (side === "left" || side === "right") {
+    const transform:string = transformMap[side][distance];
+    return transform
   }
-  if (side === "right") {
-    const rightTransform = rightConfig.translateX(distance);
-    const { perspective, rotateY, scaleX, scaleY} = rightConfig;
-    return `perspective(${perspective}) rotateY(${rotateY}) translateX(${rightTransform}) scaleX(${scaleX}) scaleY(${scaleY})`
-  }
-    return ``;
+
+  return "";
 }
 
 const positionSideToSideRoom = ({ x, y }: PositionType, side: Side, distanceNumber: number) => {
+  console.log('isWall(x, y, mazeData)', `${x}:${y}`,isWall(x, y, mazeData), side)
   if (isWall(x, y, mazeData)) {
     const transform = sideDistanceToTransform(side, distanceNumber);
     const wall = {
-      id: `${side} x${x}/y${y} ${distanceNumber}`,
+      id: `${side} ${x}:${y} ${distanceNumber}`,
       side,
-      width: "88%",
+      width: "100%",
       height: "90%",
       transform,
       texture: "/textures/brick_wall.png",
@@ -147,13 +158,14 @@ const positionSideToSideRoom = ({ x, y }: PositionType, side: Side, distanceNumb
   }
 }
 
-const roomDirectionToSideRoom = (room: RoomPositionType) => {
+const roomDirectionToSideRooms = (room: RoomPositionType) => {
   const { x, y, distance, side } = room;
   const distanceNumber = roomDistanceToDistanceNumber(distance);
-  const roomPosition = {x, y}
-  const sideRoom = positionSideToSideRoom(roomPosition, side, distanceNumber);
-  if (!sideRoom) return;
-  return sideRoom;
+  const roomPosition = { x, y }
+  const sides = ["front", "left", "right"]
+  const sideRooms = sides.map((eachSide) => positionSideToSideRoom(roomPosition, eachSide, distanceNumber))
+  if (!sideRooms) return;
+  return sideRooms;
 };
 
 const findRoomsInLine = (distances: Distance[], direction: Direction, side: Side, position: PositionType, roomsInline: RoomPositionType[]): RoomPositionType[] => {
@@ -166,16 +178,20 @@ const findRoomsInLine = (distances: Distance[], direction: Direction, side: Side
   return findRoomsInLine(distances, direction, side, forwardRoom, moreRooms);
 };
 
-const findAllVisibleRoomCoords = (position: PositionType, direction: Direction) => {
+export const findAllVisibleRoomCoords = (position: PositionType, direction: Direction) => {
   const distances: Distance[] = ["close", "near", "mid", "far"];
   const roomsInline = findRoomsInLine(distances, direction, "forward", position, []);
   const visibleRooms = roomsInline?.map((room: RoomPositionType) => {
     const { x, y, distance } = room;
     const nearbyRooms = currentPositionToNearbyRooms({ x, y });
-    const visibleCoords = [
+    const coords = [
       { ...nearbyRooms[directionToLeft(direction)], distance, side: 'left' as "left" },
-      { ...nearbyRooms[directionToRight(direction)], distance, side: 'right' as "right" }
-    ].filter(({ x, y }: PositionType) => isWall(x, y, mazeData));
+      { ...nearbyRooms[directionToRight(direction)], distance, side: 'right' as "right" },
+      { ...nearbyRooms[direction], distance, side: 'forward' as "forward" }
+    ]
+    const visibleCoords = coords.filter(({ x, y }: PositionType) => {
+      return isWall(x, y, mazeData)
+    });
     return visibleCoords;
   }).flat();
   return visibleRooms;
@@ -184,8 +200,34 @@ const findAllVisibleRoomCoords = (position: PositionType, direction: Direction) 
 export const posDirectionToSideRooms = (playerPos: PositionType, direction: Direction) => {
   const visibleRooms: RoomPositionType[] = findAllVisibleRoomCoords(playerPos, direction) || [];
   return visibleRooms.map((room) => {
-    const sideRoom = roomDirectionToSideRoom(room, direction);
-    if (!sideRoom) return;
-    return { ...sideRoom, side: sideRoom.side as Side };
+    const sideRooms = roomDirectionToSideRooms(room);
+    if (!sideRooms) return;
+    return { ...sideRooms };
   });
 }
+
+export const forwardXPos = (direction: Direction, distance: number, pos:PositionType) =>
+  direction === "E" ? pos.x + distance : direction === "W" ? pos.x - distance : pos.x;
+export const forwardYPos = (direction: Direction, distance: number, pos:PositionType) =>
+  direction === "N" ? pos.y - distance : direction === "S" ? pos.y + distance : pos.y;
+
+export const distancePosToForwardWall = (distance: number, { x, y }: PositionType, mazeData: MazeData) => {
+  if (mazeData[y]?.[x] === "#") {
+    const wallWidth: Record<string, number> = { "3": 30, "2": 50, "1": 88 };
+    const wallHeight: Record<string, number> = {
+      "3": 44,
+      "2": 52,
+      "1": 68,
+    };
+    const wallTop: Record<string, number> = { "3": 23, "2": 19, "1": 11 };
+    return {
+      id: `wall-${distance}`,
+      width: `${wallWidth[distance]}%`,
+      height: `${wallHeight[distance]}%`,
+      top: `${wallTop[distance]}%`,
+      texture: "/textures/brick_wall.png",
+      zIndex: 30 - distance,
+    };
+  }
+}
+

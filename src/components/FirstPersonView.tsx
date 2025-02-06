@@ -1,6 +1,11 @@
 import React, { useMemo, useState, useEffect } from "react";
 import { useGame } from "../contexts/GameContext";
-import { posDirectionToSideRooms } from "../utils/viewUtils";
+import {
+  distancePosToForwardWall,
+  findAllVisibleRoomCoords,
+  posDirectionToSideRooms,
+} from "../utils/viewUtils";
+import { Direction, Distance, PositionType, Side, SideRoom } from "../types";
 
 export const FirstPersonView: React.FC = () => {
   const { direction, mazeData, playerPos } = useGame();
@@ -21,28 +26,38 @@ export const FirstPersonView: React.FC = () => {
   }, [x, y]);
 
   const frontWalls = useMemo(() => {
-    const walls = [];
-    for (let i = 1; i <= 3; i++) {
-      const checkX = direction === "E" ? x + i : direction === "W" ? x - i : x;
-      const checkY = direction === "N" ? y - i : direction === "S" ? y + i : y;
-      if (mazeData[checkY]?.[checkX] === "#") {
-        walls.push({
-          id: `wall-${i}`,
-          distance: i,
-          width: `${100 - i * 18}%`,
-          height: `${104 - i * 20}%`,
-          top: `${i * 8}%`,
-          texture: "/textures/brick_wall.png",
-          zIndex: 30 - i,
-        });
-      }
-    }
-    return walls;
+    const coords = findAllVisibleRoomCoords({ x, y }, direction);
+    console.log("rooms", rooms);
+
+    const coordsToRooms = (coords) => {
+
+    };
+    const rooms = sideRooms.map((sideRoom) => ({
+      ...sideRoom,
+      distance: i,
+      height: sideRoom.height || "100%",
+      id: sideRoom.id || "unknown-id",
+      side: sideRoom.side as Side,
+    }));
+
+    // const transform = sideDistanceToTransform(side, Number(distance));
+
+    // walls.push(...sideWalls, forwardWall);
+
+    return rooms;
   }, [x, y, direction]);
 
   const sideRooms = useMemo(() => {
     const sideWalls = posDirectionToSideRooms(playerPos, direction);
-    const walls = sideWalls.flat().filter(Boolean);
+    const walls = sideWalls
+      .flat()
+      .filter(Boolean)
+      .map((wall) => ({
+        ...wall,
+        backgroundColor: wall.backgroundColor || "grey",
+        top: wall.top || "0%",
+        opacity: wall.opacity || 1,
+      }));
     console.log("Final sideWalls before rendering:", walls);
     return walls;
   }, [playerPos, direction]);
@@ -55,8 +70,8 @@ export const FirstPersonView: React.FC = () => {
         height: "25%",
         top: "0%",
         transform: `perspective(800px) rotateX(20deg) scaleX(1) translateY(${bobOffset}px) translateZ(${movementOffset}px)`,
-        backgroundColor: "rgba(120, 120, 200, 0.8)",
-        zIndex: 10,
+        backgroundColor: "rgba(80, 10, 10, 0.5)",
+        zIndex: 1,
       },
       {
         type: "floor",
@@ -91,51 +106,57 @@ export const FirstPersonView: React.FC = () => {
       })}
       {sideRooms.map((sideRoom, index) => {
         if (!sideRoom) {
-          console.warn(`Side wall at index ${index} is undefined!`);
+          // console.warn(`Side wall at index ${index} is undefined!`);
           return null;
         }
         if (!sideRoom.transform) {
-          console.warn(
-            `Side wall at index ${index} is missing transform!`,
-            sideRoom
-          );
+          // console.warn(
+          //   `Side wall at index ${index} is missing transform!`,
+          //   sideRoom
+          // );
         }
-        console.log("sideRoom", sideRoom);
         return (
           <div
             id={`${sideRoom.id}-ind${index}`}
-            key={`${sideRoom.id}-${index}`} // Ensure each key is unique
+            key={`${sideRoom.id}-${index}`}
             className="absolute transition-all duration-200"
             style={{
-              width: sideRoom.width || "50%", // Ensure a default width
-              height: sideRoom.height || "100%", // Ensure a default height
+              width: sideRoom.width || "50%",
+              height: sideRoom.height || "100%",
               transform: sideRoom.transform || "none",
               backgroundImage: `url(${sideRoom.texture})`,
               backgroundSize: "contain",
-              backgroundColor: sideRoom.backgroundColor || "red", // Make it visible for debugging
+              backgroundColor: sideRoom.backgroundColor || "grey",
+              backgroundPosition: index % 2 ? "top" : "",
+              backgroundBlendMode: Math.floor(Math.random() * 2)
+                ? "hard-light"
+                : "",
               zIndex: sideRoom.zIndex || 10,
             }}
           />
         );
       })}
 
-      {frontWalls.map((wall) => (
-        <div
-          id={wall.id}
-          key={wall.id}
-          className="absolute left-1/2 transform -translate-x-1/2 transition-all duration-300"
-          style={{
-            width: wall.width,
-            height: wall.height,
-            top: wall.top,
-            opacity: wall.opacity,
-            backgroundImage: `url(${wall.texture})`,
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-            zIndex: wall.zIndex,
-          }}
-        />
-      ))}
+      {frontWalls.map((wall, ind) => {
+        if (!wall) return null;
+        return (
+          <div
+            id={wall.id}
+            key={wall.id}
+            className="absolute left-1/2 transform -translate-x-1/2 transition-all duration-300"
+            style={{
+              width: wall.width,
+              height: wall.height,
+              top: wall.top || "0%",
+              opacity: wall.opacity || 1,
+              backgroundImage: `url(${wall.texture})`,
+              backgroundSize: "cover",
+              backgroundPosition: "center center",
+              zIndex: wall.zIndex,
+            }}
+          />
+        );
+      })}
     </div>
   );
 };
