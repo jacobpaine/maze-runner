@@ -7,7 +7,7 @@ import React, {
   Dispatch,
   SetStateAction,
 } from "react";
-import { Direction, MazeData, PositionType } from "../types";
+import { Direction, MazeData, Position } from "../types";
 import { mazeData } from "../constants/mazeData";
 
 interface RoomType {
@@ -15,8 +15,8 @@ interface RoomType {
   description: string;
 }
 interface GameContextType {
-  setPlayerPos: Dispatch<SetStateAction<PositionType>>;
-  playerPos: PositionType;
+  setPlayerPos: Dispatch<SetStateAction<Position>>;
+  playerPos: Position;
   currentRoom: RoomType;
   setRoom: (room: RoomType) => void;
   direction: Direction;
@@ -30,7 +30,7 @@ export const GameProvider: React.FC<{
   children: ReactNode;
   mazeData: MazeData;
 }> = ({ children }) => {
-  const [playerPos, setPlayerPos] = useState<PositionType>({ x: 1, y: 1 });
+  const [playerPos, setPlayerPos] = useState<Position>({ x: 1, y: 1 });
   const [currentRoom, setCurrentRoom] = useState<RoomType>({
     name: "Starting Room",
     description: "You find yourself in a dark and damp stone chamber.",

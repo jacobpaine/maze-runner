@@ -1,17 +1,18 @@
 
-export interface PositionType {
+export interface Position {
   x: number;
   y: number;
 }
 export type Distance = "close" | "near" | "mid" | "far"
-export interface RoomPositionType extends PositionType {
+export interface RoomPosition extends Position {
   distance: Distance;
-  side: Side;
+  direction: Direction;
+  side?: Side;
 }
 
 export type MazeData = string[][];
 
-export type Direction = "N" | "E" | "S" | "W";
+export type Direction = "N" | "E" | "S" | "W" | "center";
 
 type Turn = {
   left: string
@@ -20,10 +21,9 @@ type Turn = {
 }
 export type Compass = Record<string, Turn>
 
+export type Side = "forward" | "left" | "right" | "leftLeft" | "rightRight" | "center"
 
-export type Side = "forward" | "left" | "right"
-
-export type SideRoom = {
+export type Room = {
   distance: number;
   height: string;
   id: string;
@@ -40,3 +40,4 @@ export type Coordinates = {
   distance: Distance;
   side: Side;
 }
+

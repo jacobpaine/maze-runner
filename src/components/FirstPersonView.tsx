@@ -1,14 +1,9 @@
 import React, { useMemo, useState, useEffect } from "react";
 import { useGame } from "../contexts/GameContext";
-import {
-  distancePosToForwardWall,
-  findAllVisibleRoomCoords,
-  posDirectionToSideRooms,
-} from "../utils/viewUtils";
-import { Direction, Distance, PositionType, Side, SideRoom } from "../types";
+import { findAllVisibleRoomCoords, renderRooms } from "../utils/viewUtils";
 
 export const FirstPersonView: React.FC = () => {
-  const { direction, mazeData, playerPos } = useGame();
+  const { direction, playerPos } = useGame();
   const { x, y } = playerPos;
   const [movementOffset, setMovementOffset] = useState(0);
   const [bobOffset, setBobOffset] = useState(0);
@@ -25,42 +20,27 @@ export const FirstPersonView: React.FC = () => {
     return () => clearTimeout(timeout);
   }, [x, y]);
 
-  const frontWalls = useMemo(() => {
-    const coords = findAllVisibleRoomCoords({ x, y }, direction);
-    console.log("rooms", rooms);
-
-    const coordsToRooms = (coords) => {
-
-    };
-    const rooms = sideRooms.map((sideRoom) => ({
-      ...sideRoom,
-      distance: i,
-      height: sideRoom.height || "100%",
-      id: sideRoom.id || "unknown-id",
-      side: sideRoom.side as Side,
-    }));
-
-    // const transform = sideDistanceToTransform(side, Number(distance));
-
-    // walls.push(...sideWalls, forwardWall);
-
+  const walls = useMemo(() => {
+    const visibility = 4;
+    const coords = findAllVisibleRoomCoords({ x, y }, direction, visibility);
+    const rooms = renderRooms({x,y}, coords, direction);
     return rooms;
   }, [x, y, direction]);
 
-  const sideRooms = useMemo(() => {
-    const sideWalls = posDirectionToSideRooms(playerPos, direction);
-    const walls = sideWalls
-      .flat()
-      .filter(Boolean)
-      .map((wall) => ({
-        ...wall,
-        backgroundColor: wall.backgroundColor || "grey",
-        top: wall.top || "0%",
-        opacity: wall.opacity || 1,
-      }));
-    console.log("Final sideWalls before rendering:", walls);
-    return walls;
-  }, [playerPos, direction]);
+  // const sideRooms = useMemo(() => {
+  //   const sideWalls = posDirectionToSideRooms(playerPos, direction);
+  //   const walls = sideWalls
+  //     .flat()
+  //     .filter(Boolean)
+  //     .map((wall) => ({
+  //       ...wall,
+  //       backgroundColor: wall.backgroundColor || "grey",
+  //       top: wall.top || "0%",
+  //       opacity: wall.opacity || 1,
+  //     }));
+  //   console.log("Final sideWalls before rendering:", walls);
+  //   return walls;
+  // }, [playerPos, direction]);
 
   const ceilingAndFloor = useMemo(() => {
     return [
@@ -104,7 +84,7 @@ export const FirstPersonView: React.FC = () => {
           ></div>
         );
       })}
-      {sideRooms.map((sideRoom, index) => {
+      {/* {sideRooms.map((sideRoom, index) => {
         if (!sideRoom) {
           // console.warn(`Side wall at index ${index} is undefined!`);
           return null;
@@ -135,24 +115,26 @@ export const FirstPersonView: React.FC = () => {
             }}
           />
         );
-      })}
+      })} */}
 
-      {frontWalls.map((wall, ind) => {
+      {walls.map((wall) => {
         if (!wall) return null;
+        const { id, width, height, backgroundImage, transform, zIndex } = wall;
         return (
           <div
-            id={wall.id}
-            key={wall.id}
+            id={id}
+            key={id}
             className="absolute left-1/2 transform -translate-x-1/2 transition-all duration-300"
             style={{
-              width: wall.width,
-              height: wall.height,
+              width: width,
+              height: height,
               top: wall.top || "0%",
               opacity: wall.opacity || 1,
-              backgroundImage: `url(${wall.texture})`,
+              transform,
+              backgroundImage: `url(${backgroundImage})`,
               backgroundSize: "cover",
               backgroundPosition: "center center",
-              zIndex: wall.zIndex,
+              zIndex,
             }}
           />
         );
