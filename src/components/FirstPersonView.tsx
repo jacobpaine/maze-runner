@@ -23,8 +23,8 @@ export const FirstPersonView: React.FC = () => {
   const walls = useMemo(() => {
     const visibility = 4;
     const coords = findAllVisibleRoomCoords({ x, y }, direction, visibility);
-    const rooms = renderRooms({x,y}, coords, direction);
-    return rooms;
+    const rooms = renderRooms({ x, y }, coords, direction);
+    return rooms.flat();
   }, [x, y, direction]);
 
   // const sideRooms = useMemo(() => {
@@ -51,7 +51,7 @@ export const FirstPersonView: React.FC = () => {
         top: "0%",
         transform: `perspective(800px) rotateX(20deg) scaleX(1) translateY(${bobOffset}px) translateZ(${movementOffset}px)`,
         backgroundColor: "rgba(80, 10, 10, 0.5)",
-        zIndex: 1,
+        zIndex: 0,
       },
       {
         type: "floor",
@@ -60,7 +60,7 @@ export const FirstPersonView: React.FC = () => {
         bottom: "0%",
         transform: `perspective(800px) rotateX(-20deg) scaleX(1) translateY(${bobOffset}px) translateZ(${movementOffset}px)`,
         backgroundColor: "rgba(80, 50, 30, 0.9)",
-        zIndex: 1,
+        zIndex: 0,
       },
     ];
   }, [bobOffset, movementOffset]);

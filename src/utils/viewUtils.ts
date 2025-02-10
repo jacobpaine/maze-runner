@@ -43,12 +43,8 @@ export const directionSideAndRoomsToPosition = (
   side: Side,
   nearbyPositions: Record<Direction, Position>
 ) => {
-  console.log('nearbyPositions', nearbyPositions)
   const leftNearbyPositions = currentPositionToNearbyRooms(nearbyPositions[directionToLeft(direction)]);
   const rightNearbyPositions = currentPositionToNearbyRooms(nearbyPositions[directionToRight(direction)]);
-  console.log('nearbyPositions["center"]', nearbyPositions["center"])
-  console.log('directionToRight(direction)', directionToRight(direction))
-  console.log('directionToLeft(direction)', directionToLeft(direction))
   const positionMap: Record<Side, Position | null> = {
     leftLeft: leftNearbyPositions[directionToLeft(direction) as Direction] || null,
     left: nearbyPositions[directionToLeft(direction) as Direction] || null,
@@ -92,77 +88,118 @@ export const turnAround = (setDirection: Dispatch<SetStateAction<Direction>>) =>
   );
 };
 
-const roomDistanceToDistanceNumber = (roomDistance: string) => {
-  const distanceMap: Record<string, number> = {
-    "close": 4,
-    "near": 3,
-    "mid": 2,
-    "far": 1
+const positionDirectionSideDistanceToTransform = (position: Position, direction: Direction, side: Side, distance: number) => {
+  if(side === 'center') return `perspective(0px) rotateY(0deg) translateX(0%) translateZ(0px) scaleX(0) scaleY(0)`
+  const transformMap: Record<string, Record<number, string>> = {
+    center: {
+      0: `perspective(550px) rotateY(90deg) translateX(-155%) translateZ(-36px) scaleX(0.5) scaleY(0.35)`,
+      1: `perspective(0px) rotateY(0deg) translateX(0%) translateZ(0.3px) scaleX(0.4) scaleY(0.4)`,
+      2: `perspective(0px) rotateY(0deg) translateX(-2%) translateZ(.2px) scaleX(0.28) scaleY(0.37)`,
+      3: `perspective(0px) rotateY(0deg) translateX(-2%) translateZ(0px) scaleX(0.31) scaleY(0.37)`,
+      4: `perspective(0px) rotateY(0deg) translateX(-2%) translateZ(0px) scaleX(0.32) scaleY(0.33)`,
+      5: `perspective(0px) rotateY(0deg) translateX(-2%) translateZ(0px) scaleX(0.29) scaleY(0.27)`,
+    },
+    left: {
+      0: `perspective(550px) rotateY(90deg) translateX(-350px) translateZ(-36px) scaleX(0.5) scaleY(0.35)`,
+      1: `perspective(550px) rotateY(90deg) translateX(-250px) translateZ(-32px) scaleX(0.5) scaleY(0.3)`,
+      2: `perspective(550px) rotateY(90deg) translateX(-150px) translateZ(-30px) scaleX(0.5) scaleY(0.3)`,
+      3: `perspective(550px) rotateY(90deg) translateX(-50px) translateZ(-28px) scaleX(0.5) scaleY(0.3)`,
+      4: `perspective(550px) rotateY(90deg) translateX(0px) translateZ(-26px) scaleX(0.4) scaleY(0.29)`,
+      5: `perspective(550px) rotateY(90deg) translateX(0%) translateZ(-24px) scaleX(0.4) scaleY(0.28)`
+    },
+    leftLeft: {
+      0: `perspective(550px) rotateY(90deg) translateX(-30%) translateZ(-40px) scaleX(0) scaleY(0)`,
+      1: `perspective(550px) rotateY(90deg) translateX(-95%) translateZ(-50px) scaleX(0.4) scaleY(0.25)`,
+      2: `perspective(550px) rotateY(90deg) translateX(-60%) translateZ(-50px) scaleX(0.4) scaleY(0.25)`,
+      3: `perspective(550px) rotateY(90deg) translateX(-175px) translateZ(-40px) scaleX(0.4) scaleY(0.25)`,
+      4: `perspective(550px) rotateY(90deg) translateX(-30%) translateZ(-40px) scaleX(0.4) scaleY(0.25)`,
+      5: `perspective(550px) rotateY(90deg) translateX(-30%) translateZ(-30px) scaleX(0.29) scaleY(0.22)`
+    },
+    right: {
+      0: `perspective(550px) rotateY(-90deg) translateX(155%) translateZ(-35px) scaleX(0.5) scaleY(0.35)`,
+      1: `perspective(550px) rotateY(-90deg) translateX(122%) translateZ(-31px) scaleX(0.5) scaleY(0.28)`,
+      2: `perspective(550px) rotateY(-90deg) translateX(75%) translateZ(-26px) scaleX(0.5) scaleY(0.25)`,
+      3: `perspective(550px) rotateY(-90deg) translateX(50%) translateZ(-22px) scaleX(0.5) scaleY(0.2)`,
+      4: `perspective(550px) rotateY(-90deg) translateX(115%) translateZ(-18px) scaleX(0.5) scaleY(0.15)`,
+      5: `perspective(550px) rotateY(-90deg) translateX(115%) translateZ(-14px) scaleX(0.5) scaleY(0.12)`
+    },
+    rightRight: {
+      0: `perspective(550px) rotateY(-80deg) translateX(100%) scaleX(0) scaleY(0)`,
+      1: `perspective(550px) rotateY(-80deg) translateX(100%) scaleX(0.5) scaleY(0.35)`,
+      2: `perspective(550px) rotateY(-80deg) translateX(100%) scaleX(0.5) scaleY(0.35)`,
+      3: `perspective(550px) rotateY(-80deg) translateX(100%) scaleX(.35) scaleY(.35)`,
+      4: `perspective(550px) rotateY(-81deg) translateX(70%) scaleX(.35) scaleY(.33)`,
+      5: `perspective(550px) rotateY(-83deg) translateX(45%) scaleX(.35) scaleY(.3)`
+    }
   }
-  return distanceMap[roomDistance]
+  return transformMap[side][distance];
 }
 
-export const leftConfig = {
-  perspective: "550px",
-  rotateY: "260deg",
-  translateX: (ind: number) => `${ind * 35 - 5 }%`,
-  translateY: "0%",
-  scaleX: ".35",
-  scaleY: ".35",
-  zIndex: "10",
-};
-
-export const rightConfig = {
-  perspective: "550px",
-  rotateY: "-80deg",
-  translateX: (ind: number) => `${ind * 35 - 5}%`,
-  translateY: "0%",
-  scaleX: ".35",
-  scaleY: ".35",
-  zIndex: "10",
-};
-
-const distanceNumberToTranslateX = (distance: number) => `${distance * 35 - 5}%`;
-
-const positionDirectionSideDistanceToTransform = (position: Position, direction: Direction, side: Side, distance: number) => {
-  if(side === 'center') return
-  const translateX = distanceNumberToTranslateX(distance);
-  console.log(`side: ${side} - distance:${distance} - translateX:${translateX}`)
-
+const positionDirectionSideDistanceToFrontTransform = (position: Position, direction: Direction, side: Side, distance: number) => {
 
   const transformMap: Record<string, Record<number, string>> = {
     left: {
-      4: `perspective(550px) rotateY(258deg) translateX(130%) scaleX(.35) scaleY(.37)`,
-      3: `perspective(550px) rotateY(259deg) translateX(100%) scaleX(.35) scaleY(.36)`,
-      2: `perspective(550px) rotateY(260deg) translateX(70%) scaleX(.35) scaleY(.34)`,
-      1: `perspective(550px) rotateY(262deg) translateX(45%) scaleX(.35) scaleY(.33)`
+      0: `perspective(550px) rotateY(90deg) translateX(-155%) translateZ(-36px) scaleX(0) scaleY(0.35)`,
+      // 0: `perspective(550px) rotateY(90deg) translateX(-155%) translateZ(-36px) scaleX(0.5) scaleY(0.35)`,
+      1: `perspective(550px) rotateY(90deg) translateX(-115%) translateZ(-32px) scaleX(0) scaleY(0.3)`,
+      // 1: `perspective(550px) rotateY(90deg) translateX(-115%) translateZ(-32px) scaleX(0.5) scaleY(0.3)`,
+      2: `perspective(550px) rotateY(90deg) translateX(-150px) translateZ(-30px) scaleX(0) scaleY(0.3)`,
+      // 2: `perspective(550px) rotateY(90deg) translateX(-150px) translateZ(-30px) scaleX(0.5) scaleY(0.3)`,
+      3: `perspective(550px) rotateY(0deg) translateX(-100px) translateZ(-22px) scaleX(0) scaleY(0.4)`,
+      // 3: `perspective(550px) rotateY(0deg) translateX(-100px) translateZ(-22px) scaleX(0.4) scaleY(0.4)`,
+      4: `perspective(550px) rotateY(0deg) translateX(-95px) translateZ(-40px) scaleX(0) scaleY(0.35)`,
+      // 4: `perspective(550px) rotateY(0deg) translateX(-95px) translateZ(-40px) scaleX(0.35) scaleY(0.35)`,
+      5: `perspective(550px) rotateY(0deg) translateX(-30%) translateZ(0px) scaleX(0) scaleY(0.27)`
+      // 5: `perspective(550px) rotateY(0deg) translateX(-30%) translateZ(0px) scaleX(0.29) scaleY(0.27)`
+    },
+    leftLeft: {
+      0: `perspective(550px) rotateY(90deg) translateX(-330px) translateZ(0px) scaleX(0) scaleY(0)`,
+      1: `perspective(550px) rotateY(90deg) translateX(-330px) translateZ(0px) scaleX(1) scaleY(1.25)`,
+      2: `perspective(550px) rotateY(0deg) translateX(-330px) translateZ(-550px) scaleX(1) scaleY(1.25)`,
+      3: `perspective(550px) rotateY(0deg) translateX(-330px) translateZ(-1100px) scaleX(1) scaleY(1.25)`,
+      4: `perspective(550px) rotateY(0deg) translateX(-330px) translateZ(-1650px) scaleX(1) scaleY(1.25)`,
+      5: `perspective(550px) rotateY(0deg) translateX(-330px) translateZ(0px) scaleX(0.29) scaleY(0.27)`
     },
     right: {
-      4: `perspective(550px) rotateY(-80deg) translateX(100%) scaleX(0.5) scaleY(0.35 )`,
-      3: `perspective(550px) rotateY(-80deg) translateX(100%) scaleX(.35) scaleY(.35)`,
-      2: `perspective(550px) rotateY(-81deg) translateX(70%) scaleX(.35) scaleY(.33)`,
-      1: `perspective(550px) rotateY(-83deg) translateX(45%) scaleX(.35) scaleY(.3)`
+      0: `perspective(550px) rotateY(0deg) translateX(255px) translateZ(0px) scaleX(1) scaleY(1.25)`,
+      1: `perspective(550px) rotateY(0deg) translateX(255px) translateZ(0px) scaleX(1) scaleY(1.25)`,
+      2: `perspective(550px) rotateY(0deg) translateX(255px) translateZ(-550px) scaleX(1) scaleY(1.25)`,
+      3: `perspective(550px) rotateY(0deg) translateX(255px) translateZ(-1100px) scaleX(1) scaleY(1.25)`,
+      4: `perspective(550px) rotateY(0deg) translateX(255px) translateZ(-1650px) scaleX(1) scaleY(1.25)`,
+      5: `perspective(550px) rotateY(0deg) translateX(255px) translateZ(-2200px) scaleX(1) scaleY(1.25)`,
     },
-    forward: {
-      4: `perspective(0px) rotateY(0deg) translateX(0px) translateZ(0.035px) scaleX(1) scaleY(1)`,
-      3: `perspective(0px) rotateY(0deg) translateX(-175px) translateZ(-3px) scaleX(3) scaleY(3.3)`,
-      2: `perspective(0px) rotateY(0deg) translateX(-275px) translateZ(-4px) scaleX(6) scaleY(5.3)`,
-      1: `perspective(0px) rotateY(0deg) translateX(-175px) translateZ(-3px) scaleX(3) scaleY(3.3)`
+    rightRight: {
+      0: `perspective(550px) rotateY(0deg) translateX(510px) translateZ(0px) scaleX(1) scaleY(1.25)`,
+      1: `perspective(550px) rotateY(0deg) translateX(510px) translateZ(0px) scaleX(1) scaleY(1.25)`,
+      2: `perspective(550px) rotateY(0deg) translateX(510px) translateZ(-550px) scaleX(1) scaleY(1.25)`,
+      3: `perspective(550px) rotateY(0deg) translateX(510px) translateZ(-1100px) scaleX(1) scaleY(1.25)`,
+      4: `perspective(550px) rotateY(0deg) translateX(510px) translateZ(-1650px) scaleX(1) scaleY(1.25)`,
+      5: `perspective(550px) rotateY(0deg) translateX(510px) translateZ(-2200px) scaleX(1) scaleY(1.25)`,
+      // 0: `perspective(550px) rotateY(-80deg) translateX(100%) scaleX(0) scaleY(0)`,
+      // 1: `perspective(550px) rotateY(-80deg) translateX(100%) scaleX(0.5) scaleY(0.35)`,
+      // 2: `perspective(550px) rotateY(-80deg) translateX(100%) scaleX(0.5) scaleY(0.35)`,
+      // 3: `perspective(550px) rotateY(-80deg) translateX(100%) scaleX(.35) scaleY(.35)`,
+      // 4: `perspective(550px) rotateY(-81deg) translateX(70%) scaleX(.35) scaleY(.33)`,
+      // 5: `perspective(550px) rotateY(-83deg) translateX(45%) scaleX(.35) scaleY(.3)`
+    },
+    center: {
+      0: `perspective(550px) rotateY(0deg) translateX(0px) translateY(0px) translateZ(0px) scaleX(1) scaleY(1)`,
+      1: `perspective(550px) rotateY(0deg) translateX(0px) translateY(0px) translateZ(0px) scaleX(1) scaleY(1.25)`,
+      2: `perspective(550px) rotateY(0deg) translateX(0px) translateY(0px) translateZ(-550px) scaleX(1) scaleY(1.25)`,
+      3: `perspective(550px) rotateY(0deg) translateX(0px) translateY(0px) translateZ(-1100px) scaleX(1) scaleY(1.25)`,
+      4: `perspective(550px) rotateY(0deg) translateX(0px) translateY(0px) translateZ(-1650px) scaleX(1) scaleY(1.25)`,
+      5: `perspective(550px) rotateY(0deg) translateX(0px) translateY(0px) translateZ(-2200px) scaleX(1) scaleY(1.25)`,
     }
   }
-
   return transformMap[side][distance];
 }
 
 const findRoomsInDirection = (position: Position, direction: Direction, visiblity: number, rooms: Position[]) => {
-  console.log('position', position, 'direction', direction, 'visiblity', visiblity, 'rooms', rooms)
   if (visiblity < 0) return rooms;
   const nextPosition = currentPositionToNearbyRooms(position)[direction]
-  console.log('nextPosition', nextPosition)
   if (nextPosition.x < 0 || nextPosition.y < 0) return rooms;
   const uniqueRooms = new Set([...rooms, nextPosition, position])
   const moreRooms = Array.from(uniqueRooms)
-  console.log('moreRooms', moreRooms)
   const newVisiblity = visiblity - 1;
   return findRoomsInDirection(nextPosition, direction, newVisiblity, moreRooms)
 }
@@ -190,13 +227,14 @@ export const distancePosToForwardWall = (distance: number, { x, y }: Position, m
       "1": 68,
     };
     const wallTop: Record<string, number> = { "3": 23, "2": 19, "1": 11 };
+
     return {
       id: `wall-${distance}`,
       width: `${wallWidth[distance]}%`,
       height: `${wallHeight[distance]}%`,
       top: `${wallTop[distance]}%`,
       texture: "/textures/brick_wall.png",
-      zIndex: 30 - distance,
+      zIndex: distance,
     };
   }
 }
@@ -214,7 +252,7 @@ export const findbackgroundStyles = (domain: string, position: Position) => {
   }
 };
 
-const isDouble = (posAxis:number, origAxis:number) => (Math.abs(origAxis) - Math.abs(posAxis)) > 1
+const isDouble = (posAxis:number, origAxis:number) => (Math.abs(origAxis - posAxis)) > 1
 
 const originPositionDirectionToSide = (origin: Position, position: Position, direction: Direction) => {
   const { x: px, y: py } = position
@@ -224,35 +262,36 @@ const originPositionDirectionToSide = (origin: Position, position: Position, dir
     return isDouble(px, ox) ? 'rightRight' : 'right';
   }
   if ((direction === 'S' && position.x > origin.x) ||
-      (direction === 'N' && position.x < origin.x)) {
+    (direction === 'N' && position.x < origin.x)) {
     return isDouble(px, ox) ? 'leftLeft' : 'left';
-  }
-  if ((direction === 'E' && position.y > origin.y) ||
-      (direction === 'W' && position.y < origin.y)) {
-      return isDouble(py, oy) ? 'leftLeft' : 'left';
   }
   if ((direction === 'E' && position.y < origin.y) ||
       (direction === 'W' && position.y > origin.y)) {
+      return isDouble(py, oy) ? 'leftLeft' : 'left';
+  }
+  if ((direction === 'E' && position.y > origin.y) ||
+      (direction === 'W' && position.y < origin.y)) {
       return isDouble(py, oy) ? 'rightRight' : 'right';
   }
   return "center"
 }
 
+const isXAxis = (direction: Direction) => direction === "N" || direction === "S";
 export const renderRooms = (origin:Position, coords: Position[], direction:Direction) => {
   return coords.map((coord: Position) => {
-    console.log('coord', coord)
     const { x: ox, y: oy } = origin;
     const { x: px, y: py } = coord;
     const domain = "";
     const { x, y } = coord;
     const position = { x, y }
     const side: Side = originPositionDirectionToSide(origin, position, direction)
-    const distance = Math.max(Math.abs(ox - px), Math.abs(oy - py))
+    const distance = !isXAxis(direction) ? Math.abs(ox - px) : Math.abs(oy - py)
     const id = `${x}:${y} D:${distance} ${side}`;
     const texture = findTexture(domain, { x, y });
     const backgroundStyles = findbackgroundStyles(domain, { x, y });
     const transform = positionDirectionSideDistanceToTransform(position, direction, side, distance);
-    return {
+
+    const sideWall = {
       ...coord,
       id,
       key: id,
@@ -261,7 +300,23 @@ export const renderRooms = (origin:Position, coords: Position[], direction:Direc
       width: `${100}%`,
       backgroundImage: texture,
       ...backgroundStyles,
-      zIndex: 10,
+      zIndex: distance,
     };
+
+    const frontTransform = positionDirectionSideDistanceToFrontTransform(position, direction, side, distance);
+
+    const frontWall = {
+      ...coord,
+      id: `${id} front`,
+      key: `${id} front`,
+      height: `${100}%`,
+      transform:frontTransform,
+      width: `${100}%`,
+      backgroundImage: texture,
+      ...backgroundStyles,
+      zIndex: distance,
+    }
+
+    return [frontWall, sideWall];
   });
 };
