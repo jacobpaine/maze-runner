@@ -15,8 +15,8 @@ export const FirstPersonView: React.FC = () => {
 
     const timeout = setTimeout(() => {
       setMovementOffset(0);
-      setBobOffset(0);
-    }, 100);
+      setBobOffset(-10);
+    }, 150);
     return () => clearTimeout(timeout);
   }, [x, y]);
 
@@ -27,20 +27,6 @@ export const FirstPersonView: React.FC = () => {
     return rooms.flat();
   }, [x, y, direction]);
 
-  // const sideRooms = useMemo(() => {
-  //   const sideWalls = posDirectionToSideRooms(playerPos, direction);
-  //   const walls = sideWalls
-  //     .flat()
-  //     .filter(Boolean)
-  //     .map((wall) => ({
-  //       ...wall,
-  //       backgroundColor: wall.backgroundColor || "grey",
-  //       top: wall.top || "0%",
-  //       opacity: wall.opacity || 1,
-  //     }));
-  //   console.log("Final sideWalls before rendering:", walls);
-  //   return walls;
-  // }, [playerPos, direction]);
 
   const ceilingAndFloor = useMemo(() => {
     return [
@@ -49,7 +35,7 @@ export const FirstPersonView: React.FC = () => {
         width: "110%",
         height: "25%",
         top: "0%",
-        transform: `perspective(800px) rotateX(20deg) scaleX(1) translateY(${bobOffset}px) translateZ(${movementOffset}px)`,
+        transform: `perspective(800px) rotateX(20deg) scaleX(1) translateY(0px) translateZ(${movementOffset}px)`,
         backgroundColor: "rgba(80, 10, 10, 0.5)",
         zIndex: 0,
       },
@@ -58,7 +44,7 @@ export const FirstPersonView: React.FC = () => {
         width: "110%",
         height: "40%",
         bottom: "0%",
-        transform: `perspective(800px) rotateX(-20deg) scaleX(1) translateY(${bobOffset}px) translateZ(${movementOffset}px)`,
+        transform: `perspective(800px) rotateX(-20deg) scaleX(1) translateY(-5px) translateZ(${movementOffset}px)`,
         backgroundColor: "rgba(80, 50, 30, 0.9)",
         zIndex: 0,
       },
@@ -84,38 +70,6 @@ export const FirstPersonView: React.FC = () => {
           ></div>
         );
       })}
-      {/* {sideRooms.map((sideRoom, index) => {
-        if (!sideRoom) {
-          // console.warn(`Side wall at index ${index} is undefined!`);
-          return null;
-        }
-        if (!sideRoom.transform) {
-          // console.warn(
-          //   `Side wall at index ${index} is missing transform!`,
-          //   sideRoom
-          // );
-        }
-        return (
-          <div
-            id={`${sideRoom.id}-ind${index}`}
-            key={`${sideRoom.id}-${index}`}
-            className="absolute transition-all duration-200"
-            style={{
-              width: sideRoom.width || "50%",
-              height: sideRoom.height || "100%",
-              transform: sideRoom.transform || "none",
-              backgroundImage: `url(${sideRoom.texture})`,
-              backgroundSize: "contain",
-              backgroundColor: sideRoom.backgroundColor || "grey",
-              backgroundPosition: index % 2 ? "top" : "",
-              backgroundBlendMode: Math.floor(Math.random() * 2)
-                ? "hard-light"
-                : "",
-              zIndex: sideRoom.zIndex || 10,
-            }}
-          />
-        );
-      })} */}
 
       {walls.map((wall) => {
         if (!wall) return null;

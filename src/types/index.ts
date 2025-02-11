@@ -21,7 +21,7 @@ type Turn = {
 }
 export type Compass = Record<string, Turn>
 
-export type Side = "forward" | "left" | "right" | "leftLeft" | "rightRight" | "center"
+export type Side = "forward" | "left" | "right" | "leftLeft" | "rightRight" | "center" | "backward"
 
 export type Room = {
   distance: number;
