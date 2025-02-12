@@ -1,4 +1,4 @@
-import { Position, Direction, MazeData, Compass, Distance, Side, RoomPosition, SideRoom } from "../types/index";
+import { Position, Direction, MazeData, Compass, Side } from "../types/index";
 import { mazeData } from "../constants/mazeData";
 import { Dispatch, SetStateAction } from "react";
 
@@ -94,7 +94,7 @@ export const turnAround = (setDirection: Dispatch<SetStateAction<Direction>>) =>
   );
 };
 
-const positionDirectionSideDistanceToTransform = (position: Position, direction: Direction, side: Side, distance: number) => {
+const sideDistanceToTransform = (side: Side, distance: number) => {
   if (side === 'center') return `perspective(0px) rotateY(0deg) translateX(0%) translateZ(0px) scaleX(0) scaleY(0)`
   const transZLeft = "-100";
   const transZRight = "-110";
@@ -145,7 +145,7 @@ const positionDirectionSideDistanceToTransform = (position: Position, direction:
   return transformMap[side][distance];
 }
 
-const positionDirectionSideDistanceToFrontTransform = (position: Position, direction: Direction, side: Side, distance: number) => {
+const sideDistanceToFrontTransform = (side: Side, distance: number) => {
 
   const transformMap: Record<string, Record<number, string>> = {
     left: {
@@ -256,7 +256,6 @@ const originPositionDirectionToSide = (origin: Position, position: Position, dir
 const isXAxis = (direction: Direction) => direction === "N" || direction === "S";
 
 export const renderRooms = (origin: Position, coords: Position[], direction: Direction) => {
-  console.log('coords', coords  )
   return coords.map((coord: Position) => {
     const { x: ox, y: oy } = origin;
     const { x: px, y: py } = coord;
@@ -268,7 +267,7 @@ export const renderRooms = (origin: Position, coords: Position[], direction: Dir
     const id = `${x}:${y} D:${distance} ${side}`;
     const texture = findTexture(domain, { x, y });
     const backgroundStyles = findbackgroundStyles(domain, { x, y });
-    const transform = positionDirectionSideDistanceToTransform(position, direction, side, distance);
+    const transform = sideDistanceToTransform(side, distance);
 
     const sideWall = {
       ...coord,
@@ -282,7 +281,7 @@ export const renderRooms = (origin: Position, coords: Position[], direction: Dir
       zIndex: 9 - distance
     };
 
-    const frontTransform = positionDirectionSideDistanceToFrontTransform(position, direction, side, distance);
+    const frontTransform = sideDistanceToFrontTransform(side, distance);
     const nearbyRooms = currentPositionToNearbyRooms(coord);
     const backPosition = directionSideAndRoomsToPosition(direction, "backward", nearbyRooms);
     if (backPosition === null || isWall(backPosition.x, backPosition.y, mazeData)) return [sideWall];

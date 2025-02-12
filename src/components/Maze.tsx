@@ -6,7 +6,6 @@ const Maze: React.FC = () => {
 
   return (
     <div className="flex flex-col items-center mt-4 text-white">
-      {/* Top-down Grid View */}
       <div className="bg-gray-900 p-4 rounded mt-4">
         {mazeData.map((row, y) => (
           <div key={y} className="flex">

@@ -1,17 +1,18 @@
 import React, { useMemo, useState, useEffect } from "react";
 import { useGame } from "../contexts/GameContext";
 import { findAllVisibleRoomCoords, renderRooms } from "../utils/viewUtils";
+import { useNpc } from "../contexts/NpcContext";
 
 export const FirstPersonView: React.FC = () => {
   const { direction, playerPos } = useGame();
   const { x, y } = playerPos;
   const [movementOffset, setMovementOffset] = useState(0);
   const [bobOffset, setBobOffset] = useState(0);
+  const { activeNpc } = useNpc();
 
-  // Simulate movement effects when walking
   useEffect(() => {
-    setMovementOffset((prev) => (prev === 0 ? -5 : 0)); // Forward shift
-    setBobOffset((prev) => (prev === 0 ? 3 : 0)); // Up-down bobbing effect
+    setMovementOffset((prev) => (prev === 0 ? -5 : 0));
+    setBobOffset((prev) => (prev === 0 ? 3 : 0));
 
     const timeout = setTimeout(() => {
       setMovementOffset(0);
@@ -26,7 +27,6 @@ export const FirstPersonView: React.FC = () => {
     const rooms = renderRooms({ x, y }, coords, direction);
     return rooms.flat();
   }, [x, y, direction]);
-
 
   const ceilingAndFloor = useMemo(() => {
     return [
@@ -50,6 +50,18 @@ export const FirstPersonView: React.FC = () => {
       },
     ];
   }, [bobOffset, movementOffset]);
+
+  if (activeNpc) {
+    return (
+      <div className="relative w-64 h-64 bg-gray-900 border border-gray-700 flex items-center justify-center">
+        <img
+          src={activeNpc.portrait}
+          alt={activeNpc.name}
+          className="w-full h-full object-cover"
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="relative w-64 h-64 bg-gray-900 border border-gray-700 overflow-hidden transition-all duration-200">

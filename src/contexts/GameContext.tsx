@@ -1,14 +1,17 @@
 import React, {
-  useEffect,
   createContext,
   ReactNode,
   useContext,
   useState,
+  useEffect,
   Dispatch,
   SetStateAction,
 } from "react";
 import { Direction, MazeData, Position } from "../types";
 import { mazeData } from "../constants/mazeData";
+import { currentPositionToNearbyRooms } from "../utils/viewUtils";
+import { npcData } from "../constants/npcData";
+import { useNpc } from "./NpcContext";
 
 interface RoomType {
   name: string;
@@ -26,11 +29,11 @@ interface GameContextType {
 
 const GameContext = createContext<GameContextType | undefined>(undefined);
 
-export const GameProvider: React.FC<{
-  children: ReactNode;
-  mazeData: MazeData;
-}> = ({ children }) => {
-  const [playerPos, setPlayerPos] = useState<Position>({ x: 1, y: 1 });
+export const GameProvider: React.FC<{ children: ReactNode }> = ({
+  children,
+}) => {
+  const { setActiveNpc } = useNpc();
+  const [playerPos, setPlayerPos] = useState<Position>({ x: 2, y: 2 });
   const [currentRoom, setCurrentRoom] = useState<RoomType>({
     name: "Starting Room",
     description: "You find yourself in a dark and damp stone chamber.",
@@ -38,8 +41,20 @@ export const GameProvider: React.FC<{
   const [direction, setDirection] = useState<"N" | "S" | "E" | "W">("N");
 
   useEffect(() => {
-    console.log("Updated Direction:", direction);
-  }, [direction]);
+    const newPos = currentPositionToNearbyRooms(playerPos)[direction];
+    if (newPos.x !== playerPos.x || newPos.y !== playerPos.y) {
+      const npc = npcData.find(
+        (npc) =>
+          npc.position.x === playerPos.x && npc.position.y === playerPos.y
+      );
+      console.log("npc", npc);
+      if (npc) {
+        setActiveNpc(npc);
+      } else {
+        setActiveNpc(null);
+      }
+    }
+  }, [playerPos]);
 
   return (
     <GameContext.Provider
