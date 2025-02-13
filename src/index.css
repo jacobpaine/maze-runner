@@ -2,6 +2,14 @@
 @tailwind components;
 @tailwind utilities;
 @import "tailwindcss";
+@font-face {
+  font-family: 'MedievalSharp';
+  src: url('https://fonts.googleapis.com/css2?family=MedievalSharp&display=swap');
+}
+
+.font-medieval {
+  font-family: 'MedievalSharp', cursive;
+}
 
 :root {
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
@@ -71,6 +79,154 @@ button:focus-visible {
     background-color: #f9f9f9;
   }
 }
+.perspective-500 {
+  perspective: 500px;
+
+}
+
+.pixel-border {
+  border: 16px solid transparent;
+  border-image-source: url('assets/rose-border1.png');
+  border-image-slice: 20;
+  border-image-width: 16px;
+  border-image-repeat: stretch;
+}
+
+
+/* Import TailwindCSS */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Import Medieval Font */
+@font-face {
+  font-family: 'MedievalSharp';
+  src: url('https://fonts.googleapis.com/css2?family=MedievalSharp&display=swap');
+}
+
+/* Apply Medieval Font */
+.font-medieval {
+  font-family: 'MedievalSharp', cursive;
+}
+
+/* Global Styles */
+:root {
+  font-family: 'MedievalSharp', system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+
+  color-scheme: light dark;
+  color: rgba(255, 255, 255, 0.87);
+  background-color: #1b1b1b;
+  /* Darker medieval background */
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Body */
+body {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 320px;
+  min-height: 100vh;
+}
+
+/* Header Styling */
+h1 {
+  font-size: 3rem;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+  color: #fff;
+  letter-spacing: 2px;
+}
+
+/* Links */
+a {
+  font-weight: 500;
+  color: #8b5e3c;
+  text-decoration: inherit;
+}
+
+a:hover {
+  color: #a06b45;
+}
+
+/* Buttons */
+button {
+  border-radius: 8px;
+  border: 2px solid #6b4e3d;
+  padding: 0.6em 1.2em;
+  font-size: 1em;
+  font-weight: 500;
+  background: linear-gradient(180deg, #8b5e3c, #5a3d2b);
+  color: #fff;
+  cursor: pointer;
+  transition: all 0.3s ease-in-out;
+}
+
+button:hover {
+  background: linear-gradient(180deg, #a06b45, #6b4e3d);
+  box-shadow: 0 0 10px rgba(255, 200, 100, 0.5);
+}
+
+button:focus,
+button:focus-visible {
+  outline: 4px auto -webkit-focus-ring-color;
+}
+
+/* Interaction Box (for NPCs) */
+.interaction-box {
+  position: fixed;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 300px;
+  height: auto;
+  background: rgba(255, 255, 255, 0.95);
+  padding: 20px;
+  border: 8px solid #6b4e3d;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+  font-family: 'MedievalSharp', cursive;
+  color: #3d2b1f;
+}
+
+/* Full-Screen RPG Pixel Border */
+.pixel-border {
+  border: 16px solid transparent;
+  border-image-source: url('/assets/rose-border1.png');
+  /* Ensure the correct path */
+  border-image-slice: 20;
+  border-image-width: 16px;
+  border-image-repeat: stretch;
+}
+
+/* Retro CRT Effects */
+.crt-effect {
+  animation: flicker 1.5s infinite alternate;
+  filter: contrast(1.2) brightness(0.9);
+  text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.2);
+}
+
+@keyframes flicker {
+  0% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.95;
+  }
+
+  100% {
+    opacity: 1;
+  }
+}
+
+/* 3D Perspective for UI Depth */
 .perspective-500 {
   perspective: 500px;
 }

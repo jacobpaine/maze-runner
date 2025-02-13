@@ -3,7 +3,7 @@ export const npcData = [
     id: "old_man",
     name: "Old Man",
     position: { x: 2, y: 2 },
-    portrait: "/assets/npc_oldman.png", // Path to portrait
+    portrait: "/assets/oldman.gif", // Path to portrait
     dialogue: [
       {
         text: "Welcome, traveler! What brings you here?",

@@ -54,11 +54,14 @@ export const FirstPersonView: React.FC = () => {
   if (activeNpc) {
     return (
       <div className="relative w-64 h-64 bg-gray-900 border border-gray-700 flex items-center justify-center">
-        <img
-          src={activeNpc.portrait}
-          alt={activeNpc.name}
-          className="w-full h-full object-cover"
-        />
+        <div className="relative w-64 h-64 bg-gray-900 border border-gray-700 flex items-center justify-center">
+          {activeNpc.portrait}
+          <img
+            src={activeNpc.portrait}
+            alt={activeNpc.name}
+            className="w-full h-full object-cover"
+          />
+        </div>
       </div>
     );
   }

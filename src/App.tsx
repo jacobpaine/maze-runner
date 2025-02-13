@@ -2,8 +2,6 @@ import { useEffect } from "react";
 import { FirstPersonView } from "./components/FirstPersonView";
 import Maze from "./components/Maze";
 import { useGame } from "./contexts/GameContext";
-import { useNpc } from "./contexts/NpcContext";
-import { npcData } from "./constants/npcData";
 import {
   moveForward,
   turnAround,
@@ -14,7 +12,6 @@ import InteractionBox from "./components/InteractionBox";
 
 export default function App() {
   const { playerPos, setDirection, direction, setPlayerPos } = useGame();
-  const { activeNpc, setActiveNpc } = useNpc();
 
   const handleLeft = () => {
     turnLeft(setDirection);
@@ -63,26 +60,23 @@ export default function App() {
     };
   }, [playerPos, direction]); // Add direction to dependencies
 
-
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-900 text-white">
-      {/* Game Title */}
       <h1 className="text-3xl font-bold mb-4">Maze Runner</h1>
-
       <div className="flex space-x-4">
         <FirstPersonView />
         <InteractionBox />
       </div>
+
       <div className="mt-4 p-2 bg-gray-800 rounded text-center">
         <p>
           📍 Position: {playerPos.x}, {playerPos.y} | 🧭 Facing: {direction}
         </p>
       </div>
-
       <Maze />
 
       {/* Movement Controls */}
-      <div className="mt-4 space-x-4">
+      {/* <div className="mt-4 space-x-4">
         <button onClick={handleLeft} className="p-2 bg-gray-700 rounded">
           ↩️ Left
         </button>
@@ -101,7 +95,7 @@ export default function App() {
         onClick={() => setActiveNpc(npcData[0])}
       >
         Open NPC Dialog
-      </button>
+      </button> */}
     </div>
   );
 }
